@@ -44,7 +44,7 @@ private char advance(ref Scanner scanner)
 
 private void addToken(ref Scanner scanner, TokenType type)
 {
-	addToken(scanner, type, createNullLiteral);
+	addToken(scanner, type, Literal(null));
 }
 
 private void addToken(ref Scanner scanner, TokenType type, Literal literal)
@@ -193,7 +193,7 @@ Token[] scanTokens(scope ref Scanner scanner)
 		scanner.scanToken();
 	}
 
-	scanner.tokens ~= Token(TokenType.EOF, "", createNullLiteral, scanner.line);
+	scanner.tokens ~= Token(TokenType.EOF, "", Literal(null), scanner.line);
 	return scanner.tokens;
 }
 

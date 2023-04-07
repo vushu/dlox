@@ -55,8 +55,7 @@ enum TokenType : int
 	EOF
 }
 
-alias LiteralType = SumType!(string, int, double,);
-alias Literal = Nullable!LiteralType;
+alias Literal = SumType!(string, int, double, typeof(null));
 
 struct Token
 {
@@ -67,28 +66,23 @@ struct Token
 
 	public string toString()
 	{
+		bool isNull = literal.match!((ref typeof(null) _) => true, 
+		_ => false);
 		return "{ type: " ~ type.to!string ~ ", lexeme: " ~ lexeme ~ ", literal: " ~ (
-			literal.isNull ? "null" : (
+			isNull ? "null" : (
 				literal.to!string)) ~ ", line: " ~ line
 			.to!string ~ " }";
 	}
 }
 
-Literal createNullLiteral()
-{
-	auto n = nullable(LiteralType(int.init));
-	n.nullify;
-	return n;
-}
-
 Literal createStringLiteral(string value)
 {
-	return nullable(LiteralType(value));
+	return Literal(value);
 }
 
 Literal createDoubleLiteral(string value)
 {
-	return nullable(LiteralType(to!double(value)));
+	return Literal(to!double(value));
 }
 
 unittest
@@ -100,7 +94,9 @@ unittest
 
 unittest
 {
+	import std.stdio;
 	TokenType type = TokenType.IDENTIFIER;
-	auto token = Token(type, "", createNullLiteral, 1);
+	auto token = Token(type, "", Literal(null), 1);
 	assert(token.toString == "{ type: IDENTIFIER, lexeme: , literal: null, line: 1 }");
+
 }
