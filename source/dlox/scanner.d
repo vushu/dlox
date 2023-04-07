@@ -144,10 +144,26 @@ private void scanToken(scope ref Scanner scanner)
 	case '/':
 		if (scanner.match('/'))
 		{
+			Lox.error(scanner.line, "damn ");
 			// A comment goes until the end of line.
-			while (scanner.peek != '\n' && !scanner.isAtEnd)
+			while (scanner.peek !is '\n' && !scanner.isAtEnd)
 			{
 				scanner.advance;
+			}
+		}
+		else if (scanner.match('*'))
+		{
+			Lox.error(scanner.line, "c-style comment");
+
+			while (scanner.peek !is '*' && scanner.peekNext !is '/' && !scanner.isAtEnd)
+			{
+				scanner.advance;
+			}
+
+			if (scanner.peek is '*' && scanner.peekNext is '/')
+			{
+				// consuming * and then / thats why we increment by 2
+				scanner.current += 2;
 			}
 		}
 		else
