@@ -1,0 +1,9 @@
+{
+	"authors": [
+		"Dan Vu"
+	],
+	"copyright": "Copyright © 2023, Dan Vu",
+	"description": "A minimal D application.",
+	"license": "proprietary",
+	"name": "dlox"
+}
