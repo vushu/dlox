@@ -4,17 +4,6 @@ import dlox.token;
 import std.typecons : nullable, Nullable;
 import std.experimental.logger;
 
-struct Scanner
-{
-	string source;
-	Token[] tokens;
-private:
-	uint start = 0;
-	uint current = 0;
-	uint line = 0;
-
-}
-
 enum TokenType[string] KEYWORDS = [
 	"and": TokenType.AND,
 	"class": TokenType.CLASS,
@@ -34,174 +23,217 @@ enum TokenType[string] KEYWORDS = [
 	"while": TokenType.WHILE,
 ];
 
-private char advance(ref Scanner scanner)
+struct Scanner
 {
-	with (scanner)
+	string source;
+	Token[] tokens;
+	uint start = 0;
+	uint current = 0;
+	uint line = 0;
+
+	Token[] scanTokens()
+	{
+
+		while (!isAtEnd)
+		{
+			start = current;
+			scanToken();
+		}
+
+		tokens ~= Token(TokenType.EOF, "", Literal(null), line);
+		return tokens;
+	}
+
+	private char advance()
 	{
 		return source[current++];
 	}
-}
 
-private void addToken(ref Scanner scanner, TokenType type)
-{
-	addToken(scanner, type, Literal(null));
-}
+	private void addToken(TokenType type)
+	{
+		addToken(type, Literal(null));
+	}
 
-private void addToken(ref Scanner scanner, TokenType type, Literal literal)
-{
-	with (scanner)
+	private void addToken(TokenType type, Literal literal)
 	{
 		string text = source[start .. current];
 		tokens ~= Token(type, text, literal, line);
 	}
-}
 
-//to look at second character
-bool match(ref Scanner scanner, char expected)
-{
-	if (scanner.isAtEnd)
+	//to look at second character
+	private bool match(char expected)
 	{
-		return false;
+		if (isAtEnd)
+			return false;
+
+		if (source[current] != expected)
+			return false;
+
+		current++;
+		return true;
 	}
 
-	if (scanner.source[scanner.current] != expected)
+	private char peek()
 	{
-		return false;
+		if (isAtEnd)
+			return '\0';
+		return source[current];
 	}
-	scanner.current++;
-	return true;
-}
 
-char peek(scope ref const(Scanner) scanner)
-{
-	if (scanner.isAtEnd)
-	{
-		return '\0';
-	}
-	return scanner.source[scanner.current];
-}
-
-private char peekNext(scope ref Scanner scanner)
-{
-	with (scanner)
+	private char peekNext()
 	{
 		if (current + 1 >= source.length)
-		{
 			return '\0';
-		}
-		return source[scanner.current + 1];
+
+		return source[current + 1];
 	}
-}
 
-private void scanToken(scope ref Scanner scanner)
-{
-	char c = advance(scanner);
-
-	switch (c)
+	private void scanToken()
 	{
-	case '(':
-		scanner.addToken(TokenType.LEFT_PAREN);
-		break;
-	case ')':
-		scanner.addToken(TokenType.RIGHT_PAREN);
-		break;
-	case '{':
-		scanner.addToken(TokenType.LEFT_BRACE);
-		break;
-	case '}':
-		scanner.addToken(TokenType.RIGHT_BRACE);
-		break;
-	case ',':
-		scanner.addToken(TokenType.COMMA);
-		break;
-	case '.':
-		scanner.addToken(TokenType.DOT);
-		break;
-	case '-':
-		scanner.addToken(TokenType.MINUS);
-		break;
-	case '+':
-		scanner.addToken(TokenType.PLUS);
-		break;
-	case ';':
-		scanner.addToken(TokenType.SEMICOLON);
-		break;
-	case '*':
-		scanner.addToken(TokenType.STAR);
-		break;
-	case '!':
-		scanner.addToken(scanner.match('=') ? TokenType.BANG_EQUAL : TokenType.BANG);
-		break;
-	case '=':
-		scanner.addToken(scanner.match('=') ? TokenType.EQUAL_EQUAL : TokenType.EQUAL);
-		break;
-	case '<':
-		scanner.addToken(scanner.match('=') ? TokenType.LESS_EQUAL : TokenType.LESS);
-		break;
-	case '>':
-		scanner.addToken(scanner.match('=') ? TokenType.GREATER_EQUAL : TokenType.GREATER);
-		break;
-	case '/':
-		if (scanner.match('/'))
+		char c = advance();
+
+		switch (c)
 		{
-			// A comment goes until the end of line.
-			while (scanner.peek != '\n' && !scanner.isAtEnd)
+		case '(':
+			addToken(TokenType.LEFT_PAREN);
+			break;
+		case ')':
+			addToken(TokenType.RIGHT_PAREN);
+			break;
+		case '{':
+			addToken(TokenType.LEFT_BRACE);
+			break;
+		case '}':
+			addToken(TokenType.RIGHT_BRACE);
+			break;
+		case ',':
+			addToken(TokenType.COMMA);
+			break;
+		case '.':
+			addToken(TokenType.DOT);
+			break;
+		case '-':
+			addToken(TokenType.MINUS);
+			break;
+		case '+':
+			addToken(TokenType.PLUS);
+			break;
+		case ';':
+			addToken(TokenType.SEMICOLON);
+			break;
+		case '*':
+			addToken(TokenType.STAR);
+			break;
+		case '!':
+			addToken(match('=') ? TokenType.BANG_EQUAL : TokenType.BANG);
+			break;
+		case '=':
+			addToken(match('=') ? TokenType.EQUAL_EQUAL : TokenType.EQUAL);
+			break;
+		case '<':
+			addToken(match('=') ? TokenType.LESS_EQUAL : TokenType.LESS);
+			break;
+		case '>':
+			addToken(match('=') ? TokenType.GREATER_EQUAL : TokenType.GREATER);
+			break;
+		case '/':
+			if (match('/'))
 			{
-				scanner.advance;
+				// A comment goes until the end of line.
+				while (peek != '\n' && !isAtEnd)
+				{
+					advance;
+				}
 			}
-		}
-		else
-		{
-			scanner.addToken(TokenType.SLASH);
-		}
-		break;
-	case ' ':
-	case '\r':
-	case '\t':
-		// ignoring whitespace.
-		break;
-	case '\n':
-		scanner.line++;
-		break;
-	case '"':
+			else
+				addToken(TokenType.SLASH);
+			break;
+		case ' ':
+		case '\r':
+		case '\t':
+			// ignoring whitespace.
+			break;
+		case '\n':
+			line++;
+			break;
+		case '"':
 
-		break;
-	default:
-		if (c.isDigit)
-		{
-			scanner.handleNumber;
+			break;
+		default:
+			if (c.isDigit)
+			{
+				handleNumber;
+			}
+			else if (c.isAlphaNumberic)
+			{
+				handleIdentifier;
+			}
+			else
+				Lox.error(line, "Unexpected character");
+			break;
 		}
-		else if (c.isAlphaNumberic)
-		{
-			scanner.handleIdentifier;
-		}
-		else
-		{
-			Lox.error(scanner.line, "Unexpected character");
-		}
-		break;
+
 	}
 
-}
-
-Token[] scanTokens(scope ref Scanner scanner)
-{
-
-	while (!scanner.isAtEnd)
-	{
-		scanner.start = scanner.current;
-		scanner.scanToken();
-	}
-
-	scanner.tokens ~= Token(TokenType.EOF, "", Literal(null), scanner.line);
-	return scanner.tokens;
-}
-
-bool isAtEnd(scope ref const(Scanner) scanner)
-{
-	with (scanner)
+	private bool isAtEnd()
 	{
 		return current >= source.length;
+	}
+
+	private void handleIdentifier()
+	{
+		while (peek.isAlphaNumberic)
+		{
+			advance;
+		}
+		string text = source[start .. current];
+		// see if any keywords
+		auto found = text in KEYWORDS;
+		auto type = TokenType.IDENTIFIER;
+
+		if (found !is null)
+		{
+			type = *found;
+		}
+		addToken(type);
+	}
+
+	void handleNumber()
+	{
+		while (peek.isDigit)
+		{
+			advance;
+		}
+
+		if (peek == '.' && peekNext.isDigit)
+		{
+			advance;
+		}
+
+		addToken(TokenType.NUMBER, createDoubleLiteral(source[start .. current]));
+	}
+
+	void handleString()
+	{
+		while (peek != '"' && !isAtEnd)
+		{
+			if (peek == '\n')
+			{
+				line++;
+			}
+			advance;
+		}
+		if (isAtEnd)
+		{
+			Lox.error(line, "Unterminated string.");
+			return;
+		}
+
+		advance;
+
+		// Trim the surrounding quotes.
+		string value = source[start + 1 .. current + 1];
+		addToken(TokenType.STRING, createStringLiteral(value));
 	}
 }
 
@@ -218,71 +250,6 @@ private bool isAlpha(char c)
 private bool isAlphaNumberic(char c)
 {
 	return c.isAlpha || c.isDigit;
-}
-
-private void handleIdentifier(scope ref Scanner scanner)
-{
-	while (scanner.peek.isAlphaNumberic)
-	{
-		scanner.advance;
-	}
-	with (scanner)
-	{
-		string text = scanner.source[start .. current];
-		// see if any keywords
-		auto found = text in KEYWORDS;
-		auto type = TokenType.IDENTIFIER;
-
-		if (found !is null)
-		{
-			type = *found;
-		}
-		scanner.addToken(type);
-	}
-}
-
-private void handleNumber(scope ref Scanner scanner)
-{
-	while (scanner.peek.isDigit)
-	{
-		scanner.advance;
-	}
-
-	if (scanner.peek == '.' && scanner.peekNext.isDigit)
-	{
-		scanner.advance();
-	}
-
-	with (scanner)
-	{
-		scanner.addToken(TokenType.NUMBER, createDoubleLiteral(source[start .. current]));
-	}
-}
-
-private void handleString(scope ref Scanner scanner)
-{
-	while (scanner.peek != '"' && !scanner.isAtEnd)
-	{
-		if (scanner.peek == '\n')
-		{
-			scanner.line++;
-		}
-		scanner.advance;
-	}
-	if (scanner.isAtEnd)
-	{
-		Lox.error(scanner.line, "Unterminated string.");
-		return;
-	}
-
-	scanner.advance;
-
-	// Trim the surrounding quotes.
-	with (scanner)
-	{
-		string value = source[start + 1 .. current + 1];
-		scanner.addToken(TokenType.STRING, createStringLiteral(value));
-	}
 }
 
 unittest
