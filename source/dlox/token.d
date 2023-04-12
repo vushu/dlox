@@ -55,7 +55,30 @@ enum TokenType : int
 	EOF
 }
 
-alias Literal = SumType!(string, int, double, typeof(null));
+enum TokenType[string] KEYWORDS = [
+	"and": TokenType.AND,
+	"class": TokenType.CLASS,
+	"else": TokenType.ELSE,
+	"false": TokenType.FALSE,
+	"for": TokenType.FOR,
+	"fun": TokenType.FUN,
+	"if": TokenType.IF,
+	"nil": TokenType.NIL,
+	"or": TokenType.OR,
+	"print": TokenType.PRINT,
+	"return": TokenType.RETURN,
+	"super": TokenType.SUPER,
+	"this": TokenType.THIS,
+	"true": TokenType.TRUE,
+	"var": TokenType.VAR,
+	"while": TokenType.WHILE,
+];
+
+struct Nothing
+{
+}
+
+alias Literal = SumType!(string, int, double, Nothing);
 
 struct Token
 {
@@ -66,8 +89,8 @@ struct Token
 
 	public string toString()
 	{
-		bool isNull = literal.match!((ref typeof(null) _) => true, 
-		_ => false);
+		bool isNull = literal.match!((ref Nothing _) => true,
+			_ => false);
 		return "{ type: " ~ type.to!string ~ ", lexeme: " ~ lexeme ~ ", literal: " ~ (
 			isNull ? "null" : (
 				literal.to!string)) ~ ", line: " ~ line
@@ -95,8 +118,9 @@ unittest
 unittest
 {
 	import std.stdio;
+
 	TokenType type = TokenType.IDENTIFIER;
-	auto token = Token(type, "", Literal(null), 1);
+	auto token = Token(type, "", Literal(Nothing()), 1);
 	assert(token.toString == "{ type: IDENTIFIER, lexeme: , literal: null, line: 1 }");
 
 }
