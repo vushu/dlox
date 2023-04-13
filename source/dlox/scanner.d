@@ -63,13 +63,20 @@ private:
     }
 
     void scanToken() {
-        char c = advance();
-
+        char c = advance;
         switch (c) {
-        case '(': addToken(TokenType.LEFT_PAREN); break;
-        case ')': addToken(TokenType.RIGHT_PAREN); break;
-        case '{': addToken(TokenType.LEFT_BRACE); break;
-        case '}': addToken(TokenType.RIGHT_BRACE); break;
+        case '(':
+            addToken(TokenType.LEFT_PAREN);
+            break;
+        case ')':
+            addToken(TokenType.RIGHT_PAREN);
+            break;
+        case '{':
+            addToken(TokenType.LEFT_BRACE);
+            break;
+        case '}':
+            addToken(TokenType.RIGHT_BRACE);
+            break;
         case ',':
             addToken(TokenType.COMMA);
             break;
@@ -109,9 +116,7 @@ private:
             } else
                 addToken(TokenType.SLASH);
             break;
-        case ' ':
-        case '\r':
-        case '\t':
+        case ' ', '\r', '\t':
             // ignoring whitespace.
             break;
         case '\n':
