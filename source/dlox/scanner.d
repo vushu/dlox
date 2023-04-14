@@ -1,31 +1,34 @@
 module dlox.scanner;
 import dlox.lox;
 import dlox.token;
-import std.typecons : nullable, Nullable;
 import std.experimental.logger;
 
 struct Scanner {
-    string source;
-    Token[] tokens;
-    uint start = 0;
-    uint current = 0;
-    uint line = 0;
+
+    this(string source){
+        _source = source;
+    }
 
     Token[] scanTokens() {
 
         while (!isAtEnd) {
-            start = current;
+            _start = _current;
             scanToken();
         }
 
-        tokens ~= Token(TokenType.EOF, "", Literal(Nothing()), line);
-        return tokens;
+        _tokens ~= Token(TokenType.EOF, "", Literal(Nothing()), _line);
+        return _tokens;
     }
 
 private:
+    string _source;
+    Token[] _tokens;
+    uint _start = 0;
+    uint _current = 0;
+    uint _line = 0;
 
     char advance() {
-        return source[current++];
+        return _source[_current++];
     }
 
     void addToken(TokenType type) {
@@ -33,8 +36,8 @@ private:
     }
 
     void addToken(TokenType type, Literal literal) {
-        string text = source[start .. current];
-        tokens ~= Token(type, text, literal, line);
+        string text = _source[_start .. _current];
+        _tokens ~= Token(type, text, literal, _line);
     }
 
     //to look at second character
@@ -42,24 +45,24 @@ private:
         if (isAtEnd)
             return false;
 
-        if (source[current] != expected)
+        if (_source[_current] != expected)
             return false;
 
-        current++;
+        _current++;
         return true;
     }
 
     char peek() {
         if (isAtEnd)
             return '\0';
-        return source[current];
+        return _source[_current];
     }
 
     char peekNext() {
-        if (current + 1 >= source.length)
+        if (_current + 1 >= _source.length)
             return '\0';
 
-        return source[current + 1];
+        return _source[_current + 1];
     }
 
     void scanToken() {
@@ -120,7 +123,7 @@ private:
             // ignoring whitespace.
             break;
         case '\n':
-            line++;
+            _line++;
             break;
         case '"':
 
@@ -131,21 +134,21 @@ private:
             } else if (c.isAlphaNumberic) {
                 handleIdentifier;
             } else
-                Lox.error(line, "Unexpected character");
+                Lox.error(_line, "Unexpected character");
             break;
         }
 
     }
 
     bool isAtEnd() {
-        return current >= source.length;
+        return _current >= _source.length;
     }
 
     void handleIdentifier() {
         while (peek.isAlphaNumberic) {
             advance;
         }
-        string text = source[start .. current];
+        string text = _source[_start .. _current];
         // see if any keywords
         auto found = text in KEYWORDS;
         auto type = TokenType.IDENTIFIER;
@@ -165,25 +168,25 @@ private:
             advance;
         }
 
-        addToken(TokenType.NUMBER, createDoubleLiteral(source[start .. current]));
+        addToken(TokenType.NUMBER, createDoubleLiteral(_source[_start .. _current]));
     }
 
     void handleString() {
         while (peek != '"' && !isAtEnd) {
             if (peek == '\n') {
-                line++;
+                _line++;
             }
             advance;
         }
         if (isAtEnd) {
-            Lox.error(line, "Unterminated string.");
+            Lox.error(_line, "Unterminated string.");
             return;
         }
 
         advance;
 
         // Trim the surrounding quotes.
-        string value = source[start + 1 .. current + 1];
+        string value = _source[_start + 1 .. _current + 1];
         addToken(TokenType.STRING, createStringLiteral(value));
     }
 } // End of Scanner
