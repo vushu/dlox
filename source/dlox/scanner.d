@@ -5,7 +5,7 @@ import std.experimental.logger;
 
 struct Scanner {
 
-    this(string source){
+    this(string source) {
         _source = source;
     }
 
@@ -165,7 +165,10 @@ private:
         }
 
         if (peek == '.' && peekNext.isDigit) {
-            advance;
+            advance; // Consume the "."
+            while (peek.isDigit) {
+                advance;
+            }
         }
 
         addToken(TokenType.NUMBER, createDoubleLiteral(_source[_start .. _current]));
@@ -205,8 +208,21 @@ private bool isAlphaNumberic(char c) {
 
 unittest {
     import std.stdio : writeln;
+    import std.conv : to;
 
-    writeln("Finding OR");
+    writeln("Should resolv source as NUMBER");
+
+    auto scanner = Scanner("3.14");
+    Token[] tokens = scanner.scanTokens;
+    assert(tokens[0].literal.to!string == "3.14");
+    assert(tokens[0].type == TokenType.NUMBER);
+    assert(tokens[$ - 1].type == TokenType.EOF);
+}
+
+unittest {
+    import std.stdio : writeln;
+
+    writeln("Should resolve source as OR");
 
     auto scanner = Scanner("or");
     Token[] tokens = scanner.scanTokens;
