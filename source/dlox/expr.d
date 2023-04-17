@@ -9,14 +9,14 @@ import std.string : toLower;
 template makeVisit(string baseName, string typeName) {
     const char[] makeVisit =
         [
-            "void visit", typeName, baseName, "(", typeName, " ",
+            "R visit", typeName, baseName, "(", typeName, "!R ",
             baseName.toLower,
             ");"
     ].join;
 }
 
-interface Expr {
-    void accept(Visitor visitor);
+interface Expr(R) {
+    R accept(Visitor!R visitor);
 }
 
 alias Argument = Tuple!(string, string);
@@ -46,33 +46,32 @@ string generateConstructor(immutable(Argument[]) args) {
 template makeExpr(string baseName, string name, immutable(Argument[]) args) {
     const char[] constructor = generateConstructor(args);
     const char[] makeExpr = [
-        "class ", name, ": ", baseName, " {",
+        "class ", name, "(R): ", baseName, "!R {",
         constructor,
-        "void accept(Visitor visitor){ return visitor.visit", name,
+        "R accept(Visitor!R visitor){ return visitor.visit", name,
         baseName, "(this); }",
         "}"
     ].join;
-    pragma(msg, makeExpr);
 }
 
 mixin(makeExpr!("Expr", "Binary", [
-    Argument("Expr", "left"),
+    Argument("Expr!R", "left"),
     Argument("Token", "operator"),
-    Argument("Expr", "right")
+    Argument("Expr!R", "right")
 ]));
 
 mixin(makeExpr!("Expr", "Grouping", [
-    Argument("Expr", "expression")
+    Argument("Expr!R", "expression")
 ]));
 
 mixin(makeExpr!("Expr", "Literal", [Argument("LiteralType", "value")]));
 
 mixin(
     makeExpr!("Expr", "Unary", [
-    Argument("Token", "operator"), Argument("Expr", "right")
+    Argument("Token", "operator"), Argument("Expr!R", "right")
 ]));
 
-interface Visitor {
+interface Visitor(R) {
     mixin(makeVisit!("Expr", "Literal"));
     mixin(makeVisit!("Expr", "Binary"));
     mixin(makeVisit!("Expr", "Grouping"));
@@ -80,30 +79,9 @@ interface Visitor {
 }
 
 unittest {
-    Literal literal = new Literal(LiteralType(3.14));
+    Literal!string literal = new Literal!string(LiteralType(3.14));
     Token t = Token(TokenType.MINUS, "-", LiteralType(Nothing()), 1);
-    Unary unary = new Unary(t, literal);
+    Unary!string unary = new Unary!string(t, literal);
 
     // pragma(msg, mixin(GenerateVistorBody!("Expr", "Literal")));
 }
-/*
-abstract class GetNumber {
-    T getNumber(T)(T number) {
-        writeln("doing base");
-        return number;
-    }
-}
-
-class NumberPicker : GetNumber {
-    override T getNumber(T)(T number) {
-        writeln("doing derived");
-        return number;
-    }
-}
-
-unittest {
-    GetNumber numberPicker = new NumberPicker;
-    writeln(numberPicker.getNumber(42));
-}
-
-*/
