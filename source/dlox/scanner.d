@@ -16,7 +16,7 @@ struct Scanner {
             scanToken();
         }
 
-        _tokens ~= Token(TokenType.EOF, "", Literal(Nothing()), _line);
+        _tokens ~= Token(TokenType.EOF, "", LiteralType(Nothing()), _line);
         return _tokens;
     }
 
@@ -32,10 +32,10 @@ private:
     }
 
     void addToken(TokenType type) {
-        addToken(type, Literal(Nothing()));
+        addToken(type, LiteralType(Nothing()));
     }
 
-    void addToken(TokenType type, Literal literal) {
+    void addToken(TokenType type, LiteralType literal) {
         string text = _source[_start .. _current];
         _tokens ~= Token(type, text, literal, _line);
     }
