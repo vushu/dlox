@@ -4,7 +4,7 @@ import std.conv : to;
 import std.stdio;
 import std.typecons : Nullable, nullable;
 
-enum TokenType : int {
+enum TokenType {
     // Single-character tokens.
     LEFT_PAREN,
     RIGHT_PAREN,

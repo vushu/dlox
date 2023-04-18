@@ -5,6 +5,7 @@ import dlox.token;
 import std.typecons : Tuple;
 import std.sumtype : SumType, match;
 import std.string : toLower;
+import std.conv : to;
 
 template makeVisit(string baseName, string typeName) {
     const char[] makeVisit =
@@ -19,25 +20,28 @@ interface Expr {
     void accept(Visitor visitor);
 }
 
-alias Argument = Tuple!(string, string);
+struct Argument {
+    string typeName;
+    string variableName;
+}
 
 string generateConstructor(immutable(Argument[]) args) {
     Appender!string appender;
     appender.put("this(");
     foreach (idx, arg; args) {
-        appender.put(arg[0] ~ " " ~ arg[1]);
+        appender.put(arg.typeName ~ " " ~ arg.variableName);
         if (idx + 1 < args.length) {
             appender.put(", ");
         }
     }
     appender.put("){");
     foreach (arg; args) {
-        appender.put("this." ~ arg[1] ~ " = " ~ arg[1] ~ ";");
+        appender.put("this." ~ arg.variableName ~ " = " ~ arg.variableName ~ ";");
     }
     appender.put("}");
 
     foreach (arg; args) {
-        appender.put(arg[0] ~ " " ~ arg[1] ~ ";");
+        appender.put(arg.typeName ~ " " ~ arg.variableName ~ ";");
     }
 
     return appender.data;
@@ -52,7 +56,6 @@ template makeExpr(string baseName, string name, immutable(Argument[]) args) {
         baseName, "(this); }",
         "}"
     ].join;
-    pragma(msg, makeExpr);
 }
 
 mixin(makeExpr!("Expr", "Binary", [
@@ -83,27 +86,6 @@ unittest {
     Literal literal = new Literal(LiteralType(3.14));
     Token t = Token(TokenType.MINUS, "-", LiteralType(Nothing()), 1);
     Unary unary = new Unary(t, literal);
-
-    // pragma(msg, mixin(GenerateVistorBody!("Expr", "Literal")));
+    assert(unary.operator.lexeme == "-");
+    assert((cast(Literal) unary.right).value == LiteralType(3.14));
 }
-/*
-abstract class GetNumber {
-    T getNumber(T)(T number) {
-        writeln("doing base");
-        return number;
-    }
-}
-
-class NumberPicker : GetNumber {
-    override T getNumber(T)(T number) {
-        writeln("doing derived");
-        return number;
-    }
-}
-
-unittest {
-    GetNumber numberPicker = new NumberPicker;
-    writeln(numberPicker.getNumber(42));
-}
-
-*/
