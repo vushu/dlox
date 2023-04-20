@@ -134,7 +134,7 @@ private:
             } else if (c.isAlphaNumberic) {
                 handleIdentifier;
             } else
-                Lox.error(_line, "Unexpected character");
+                Lox.error(Token(), "Unexpected character");
             break;
         }
 
@@ -182,7 +182,7 @@ private:
             advance;
         }
         if (isAtEnd) {
-            Lox.error(_line, "Unterminated string.");
+            Lox.error(Token(), "Unterminated string.");
             return;
         }
 

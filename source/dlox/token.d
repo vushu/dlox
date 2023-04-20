@@ -76,7 +76,7 @@ enum TokenType[string] KEYWORDS = [
 struct Nothing {
 }
 
-alias LiteralType = SumType!(string, int, double, Nothing);
+alias LiteralType = SumType!(string, int, double, bool, Nothing);
 
 struct Token {
     TokenType type;
