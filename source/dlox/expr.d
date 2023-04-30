@@ -16,64 +16,65 @@ template makeVisit(string baseName, string typeName) {
     ].join;
 }
 
-interface Expr {
-    void accept(Visitor visitor);
-}
-
-struct Argument {
-    string typeName;
-    string variableName;
-}
-
-string generateConstructor(immutable(Argument[]) args) {
+string generateConstructor(immutable(string[2])[] args...) {
     Appender!string appender;
     appender.put("this(");
     foreach (idx, arg; args) {
-        appender.put(arg.typeName ~ " " ~ arg.variableName);
+        appender.put(arg[0] ~ " " ~ arg[1]);
         if (idx + 1 < args.length) {
             appender.put(", ");
         }
     }
     appender.put("){");
     foreach (arg; args) {
-        appender.put("this." ~ arg.variableName ~ " = " ~ arg.variableName ~ ";");
+        appender.put("this." ~ arg[1] ~ " = " ~ arg[1] ~ ";");
     }
     appender.put("}");
 
     foreach (arg; args) {
-        appender.put(arg.typeName ~ " " ~ arg.variableName ~ ";");
+        appender.put(arg[0] ~ " " ~ arg[1] ~ ";");
     }
 
     return appender.data;
 }
 
-template makeExpr(string baseName, string name, immutable(Argument[]) args) {
-    const char[] constructor = generateConstructor(args);
-    const char[] makeExpr = [
-        "class ", name, ": ", baseName, " {",
-        constructor,
-        "void accept(Visitor visitor){ return visitor.visit", name,
-        baseName, "(this); }",
-        "}"
+auto makeAccept(string baseName, string name) {
+
+    const char[] acceptString = [
+        "void accept(Visitor visitor){ return visitor.visit", name, baseName,
+        "(this); }"
     ].join;
+    return acceptString;
 }
 
-mixin(makeExpr!("Expr", "Binary", [
-    Argument("Expr", "left"),
-    Argument("Token", "operator"),
-    Argument("Expr", "right")
-]));
+mixin template MakeExpr(string name, immutable(string[2])[] args) {
+    mixin(generateConstructor(args));
+    mixin(makeAccept("Expr", name));
+}
+interface Expr {
+    void accept(Visitor visitor);
+}
 
-mixin(makeExpr!("Expr", "Grouping", [
-    Argument("Expr", "expression")
-]));
+class Binary : Expr {
+    mixin MakeExpr!("Binary", [
+        ["Expr", "left"], ["Token", "operator"],
+        ["Expr", "right"]
+    ]);
+}
 
-mixin(makeExpr!("Expr", "Literal", [Argument("LiteralType", "value")]));
+class Grouping : Expr {
+    mixin MakeExpr!("Grouping", [["Expr", "expression"]]);
+}
 
-mixin(
-    makeExpr!("Expr", "Unary", [
-    Argument("Token", "operator"), Argument("Expr", "right")
-]));
+class Literal : Expr {
+    mixin MakeExpr!("Literal", [["LiteralType", "value"]]);
+}
+
+class Unary : Expr {
+    mixin MakeExpr!("Unary", [
+        ["Token", "operator"], ["Expr", "right"]
+    ]);
+}
 
 interface Visitor {
     mixin(makeVisit!("Expr", "Literal"));
@@ -88,4 +89,5 @@ unittest {
     Unary unary = new Unary(t, literal);
     assert(unary.operator.lexeme == "-");
     assert((cast(Literal) unary.right).value == LiteralType(3.14));
+    writeln(Literal.stringof);
 }
