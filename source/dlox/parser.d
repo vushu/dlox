@@ -101,10 +101,6 @@ class Parser {
         throw error(peek, message);
     }
 
-    private void ddd() {
-
-    }
-
     private bool match(TokenType[] types...) {
         foreach (type; types) {
             if (check(type)) {
@@ -150,14 +146,10 @@ class Parser {
             if (previous.type == TokenType.SEMICOLON) {
                 return;
             }
-            switch (peek.type) {
-            case TokenType.CLASS,
-                TokenType.FUN,
-                TokenType.VAR,
-                TokenType.IF,
-                TokenType.WHILE,
-                TokenType.PRINT,
-                TokenType.RETURN:
+            switch (peek.type) with (TokenType) {
+            case CLASS,
+                FUN, VAR, IF,
+                WHILE, PRINT, RETURN:
                 return;
             default:
                 break;

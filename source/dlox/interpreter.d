@@ -5,17 +5,20 @@ import dlox.expr;
 import std.conv : to;
 import std.variant : Variant, variantArray;
 import std.sumtype : match;
+import std.array;
+import std.stdio;
 
 class Interpreter : Visitor {
 
     void visitLiteralExpr(Literal expr) {
-        expr.value.match!(
+        auto res = expr.value.match!(
             (ref Nothing _) => data = null,
             (ref int v) => data = v,
             (ref double v) => data = v,
             (ref bool v) => data = v,
             (ref string v) => data = v,
         );
+        writeln(res);
     }
 
     void visitBinaryExpr(Binary expr) {
@@ -24,13 +27,13 @@ class Interpreter : Visitor {
         switch (expr.operator.type) {
 
         case TokenType.MINUS:
-            data = left.get!(double) - right.get!double;
+            data = left.get!double - right.get!double;
             break;
         case TokenType.SLASH:
-            data = left.get!(double) / right.get!double;
+            data = left.get!double / right.get!double;
             break;
         case TokenType.STAR:
-            data = left.get!(double) * right.get!double;
+            data = left.get!double * right.get!double;
             break;
         case TokenType.PLUS:
             if (left.type is typeid(double) && right.type is typeid(double)) {
@@ -59,7 +62,7 @@ class Interpreter : Visitor {
     }
 
     void visitGroupingExpr(Grouping expr) {
-        evaluate(expr.expression);
+        data = evaluate(expr.expression);
     }
 
     void visitUnaryExpr(Unary expr) {
@@ -69,6 +72,7 @@ class Interpreter : Visitor {
             data = !isTruthy(right);
             break;
         case TokenType.MINUS:
+            checkNumberOperand(expr.operator, right);
             data = -right.get!double;
             break;
         default:
@@ -107,6 +111,27 @@ private bool isEqual(Variant a, Variant b) {
     return a == b;
 }
 
+private void checkNumberOperand(Token operator, Variant operand) {
+    if (operand.type is typeid(double))
+        return;
+    throw new RuntimeError(operator, "Operand must be a number");
+}
+
+private void checkNumberOperands(Token operator, Variant left, Variant right) {
+    if (left.type is typeid(double) && right.type is typeid(double))
+        return;
+    throw new RuntimeError(operator, "Operands must be a numbers");
+}
+
+private class RuntimeError : Exception {
+    Token token;
+
+    this(Token token, string msg, string file = __FILE__, size_t line = __LINE__, Throwable nextInChain = null) pure nothrow @nogc @safe {
+        super(msg, file, line, nextInChain);
+        this.token = token;
+    }
+}
+
 unittest {
     Variant v = null;
     assert(!isTruthy(v));
@@ -120,4 +145,26 @@ unittest {
 unittest {
     Variant v = false;
     assert(!isTruthy(v));
+}
+
+unittest {
+    auto t = Token(TokenType.MINUS, "", LiteralType(Nothing()), 1);
+    checkNumberOperand(t, Variant(42.0));
+}
+
+unittest {
+    import dlox.scanner;
+    import dlox.parser;
+
+    auto source_code = "(2 + 2) * -10";
+    auto scanner = new Scanner(source_code);
+    auto tokens = scanner.scanTokens;
+    auto parser = new Parser(tokens);
+    auto expr = parser.parse;
+    auto interpreter = new Interpreter;
+    if (expr) {
+        auto result = interpreter.evaluate(expr);
+        writeln(result);
+        assert(result == -40);
+    }
 }

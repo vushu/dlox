@@ -67,48 +67,48 @@ private:
 
     void scanToken() {
         char c = advance;
-        switch (c) {
+        switch (c) with (TokenType) {
         case '(':
-            addToken(TokenType.LEFT_PAREN);
+            addToken(LEFT_PAREN);
             break;
         case ')':
-            addToken(TokenType.RIGHT_PAREN);
+            addToken(RIGHT_PAREN);
             break;
         case '{':
-            addToken(TokenType.LEFT_BRACE);
+            addToken(LEFT_BRACE);
             break;
         case '}':
-            addToken(TokenType.RIGHT_BRACE);
+            addToken(RIGHT_BRACE);
             break;
         case ',':
-            addToken(TokenType.COMMA);
+            addToken(COMMA);
             break;
         case '.':
-            addToken(TokenType.DOT);
+            addToken(DOT);
             break;
         case '-':
-            addToken(TokenType.MINUS);
+            addToken(MINUS);
             break;
         case '+':
-            addToken(TokenType.PLUS);
+            addToken(PLUS);
             break;
         case ';':
-            addToken(TokenType.SEMICOLON);
+            addToken(SEMICOLON);
             break;
         case '*':
-            addToken(TokenType.STAR);
+            addToken(STAR);
             break;
         case '!':
-            addToken(match('=') ? TokenType.BANG_EQUAL : TokenType.BANG);
+            addToken(match('=') ? BANG_EQUAL : BANG);
             break;
         case '=':
-            addToken(match('=') ? TokenType.EQUAL_EQUAL : TokenType.EQUAL);
+            addToken(match('=') ? EQUAL_EQUAL : EQUAL);
             break;
         case '<':
-            addToken(match('=') ? TokenType.LESS_EQUAL : TokenType.LESS);
+            addToken(match('=') ? LESS_EQUAL : LESS);
             break;
         case '>':
-            addToken(match('=') ? TokenType.GREATER_EQUAL : TokenType.GREATER);
+            addToken(match('=') ? GREATER_EQUAL : GREATER);
             break;
         case '/':
             if (match('/')) {
@@ -117,7 +117,7 @@ private:
                     advance;
                 }
             } else
-                addToken(TokenType.SLASH);
+                addToken(SLASH);
             break;
         case ' ', '\r', '\t':
             // ignoring whitespace.
@@ -210,7 +210,7 @@ unittest {
     import std.stdio : writeln;
     import std.conv : to;
 
-    writeln("Should resolv source as NUMBER");
+    writeln("Should resolve source as NUMBER");
 
     auto scanner = Scanner("3.14");
     Token[] tokens = scanner.scanTokens;
