@@ -16,7 +16,7 @@ struct Scanner {
             scanToken();
         }
 
-        _tokens ~= Token(TokenType.EOF, "", LiteralType(Nothing()), _line);
+        _tokens ~= Token(TokenType.eof, "", LiteralType(Nothing()), _line);
         return _tokens;
     }
 
@@ -69,46 +69,46 @@ private:
         char c = advance;
         switch (c) with (TokenType) {
         case '(':
-            addToken(LEFT_PAREN);
+            addToken(leftParen);
             break;
         case ')':
-            addToken(RIGHT_PAREN);
+            addToken(rightParen);
             break;
         case '{':
-            addToken(LEFT_BRACE);
+            addToken(leftBrace);
             break;
         case '}':
-            addToken(RIGHT_BRACE);
+            addToken(rightBrace);
             break;
         case ',':
-            addToken(COMMA);
+            addToken(comma);
             break;
         case '.':
-            addToken(DOT);
+            addToken(dot);
             break;
         case '-':
-            addToken(MINUS);
+            addToken(minus);
             break;
         case '+':
-            addToken(PLUS);
+            addToken(plus);
             break;
         case ';':
-            addToken(SEMICOLON);
+            addToken(semicolon);
             break;
         case '*':
-            addToken(STAR);
+            addToken(star);
             break;
         case '!':
-            addToken(match('=') ? BANG_EQUAL : BANG);
+            addToken(match('=') ? bangEqual : bang);
             break;
         case '=':
-            addToken(match('=') ? EQUAL_EQUAL : EQUAL);
+            addToken(match('=') ? equalEqual : equal);
             break;
         case '<':
-            addToken(match('=') ? LESS_EQUAL : LESS);
+            addToken(match('=') ? lessEqual : less);
             break;
         case '>':
-            addToken(match('=') ? GREATER_EQUAL : GREATER);
+            addToken(match('=') ? greaterEqual : greater);
             break;
         case '/':
             if (match('/')) {
@@ -117,7 +117,7 @@ private:
                     advance;
                 }
             } else
-                addToken(SLASH);
+                addToken(slash);
             break;
         case ' ', '\r', '\t':
             // ignoring whitespace.
@@ -151,7 +151,7 @@ private:
         string text = _source[_start .. _current];
         // see if any keywords
         auto found = text in KEYWORDS;
-        auto type = TokenType.IDENTIFIER;
+        auto type = TokenType.identifier;
 
         if (found !is null) {
             type = *found;
@@ -171,7 +171,7 @@ private:
             }
         }
 
-        addToken(TokenType.NUMBER, createDoubleLiteral(_source[_start .. _current]));
+        addToken(TokenType.numberLiteral, createDoubleLiteral(_source[_start .. _current]));
     }
 
     void handleString() {
@@ -190,7 +190,7 @@ private:
 
         // Trim the surrounding quotes.
         string value = _source[_start + 1 .. _current + 1];
-        addToken(TokenType.STRING, createStringLiteral(value));
+        addToken(TokenType.stringLiteral, createStringLiteral(value));
     }
 } // End of Scanner
 
@@ -215,8 +215,8 @@ unittest {
     auto scanner = Scanner("3.14");
     Token[] tokens = scanner.scanTokens;
     assert(tokens[0].literal.to!string == "3.14");
-    assert(tokens[0].type == TokenType.NUMBER);
-    assert(tokens[$ - 1].type == TokenType.EOF);
+    assert(tokens[0].type == TokenType.numberLiteral);
+    assert(tokens[$ - 1].type == TokenType.eof);
 }
 
 unittest {
@@ -226,8 +226,8 @@ unittest {
 
     auto scanner = Scanner("or");
     Token[] tokens = scanner.scanTokens;
-    assert(tokens[0].type == TokenType.OR);
-    assert(tokens[1].type == TokenType.EOF);
+    assert(tokens[0].type == TokenType.orKeyword);
+    assert(tokens[1].type == TokenType.eof);
 }
 
 unittest {
@@ -237,9 +237,9 @@ unittest {
 
     auto scanner = Scanner("orchid or");
     Token[] tokens = scanner.scanTokens;
-    assert(tokens[0].type == TokenType.IDENTIFIER);
-    assert(tokens[1].type == TokenType.OR);
-    assert(tokens[$ - 1].type == TokenType.EOF);
+    assert(tokens[0].type == TokenType.identifier);
+    assert(tokens[1].type == TokenType.orKeyword);
+    assert(tokens[$ - 1].type == TokenType.eof);
     assert(tokens.length == 3);
 }
 
@@ -248,8 +248,8 @@ unittest {
 
     auto scanner = Scanner("!=");
     Token[] tokens = scanner.scanTokens;
-    assert(tokens[0].type == TokenType.BANG_EQUAL);
-    assert(tokens[1].type == TokenType.EOF);
+    assert(tokens[0].type == TokenType.bangEqual);
+    assert(tokens[1].type == TokenType.eof);
 }
 
 unittest {
@@ -258,8 +258,8 @@ unittest {
     auto scanner = Scanner("jumanji");
     writeln("Should be of type IDENTIFIER");
     Token[] tokens = scanner.scanTokens;
-    assert(tokens[0].type == TokenType.IDENTIFIER);
-    assert(tokens[1].type == TokenType.EOF);
+    assert(tokens[0].type == TokenType.identifier);
+    assert(tokens[1].type == TokenType.eof);
 }
 
 unittest {

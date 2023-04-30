@@ -52,8 +52,8 @@ unittest {
 unittest {
     ASTPrinter printer = new ASTPrinter();
     Literal literal = new Literal(LiteralType(3.14));
-    auto tok = Token(TokenType.STAR, "-", LiteralType(Nothing()), 1);
-    auto tok2 = Token(TokenType.STAR, "*", LiteralType(Nothing()), 1);
+    auto tok = Token(TokenType.star, "-", LiteralType(Nothing()), 1);
+    auto tok2 = Token(TokenType.star, "*", LiteralType(Nothing()), 1);
     auto unary = new Unary(tok, literal);
     auto binary = new Binary(new Literal(LiteralType("44")), tok2, unary);
     auto grouping = new Grouping(binary);

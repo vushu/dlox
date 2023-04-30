@@ -26,16 +26,16 @@ class Interpreter : Visitor {
         auto right = evaluate(expr.right);
         switch (expr.operator.type) {
 
-        case TokenType.MINUS:
+        case TokenType.minus:
             data = left.get!double - right.get!double;
             break;
-        case TokenType.SLASH:
+        case TokenType.slash:
             data = left.get!double / right.get!double;
             break;
-        case TokenType.STAR:
+        case TokenType.star:
             data = left.get!double * right.get!double;
             break;
-        case TokenType.PLUS:
+        case TokenType.plus:
             if (left.type is typeid(double) && right.type is typeid(double)) {
                 data = left.get!double + left.get!double;
             }
@@ -43,16 +43,16 @@ class Interpreter : Visitor {
                 data = (left.get!string ~ right.get!string);
             }
             break;
-        case TokenType.GREATER:
+        case TokenType.greater:
             data = left.get!double > right.get!double;
             break;
-        case TokenType.GREATER_EQUAL:
+        case TokenType.greaterEqual:
             data = left.get!double >= right.get!double;
             break;
-        case TokenType.BANG_EQUAL:
+        case TokenType.bangEqual:
             data = !isEqual(left, right);
             break;
-        case TokenType.EQUAL_EQUAL:
+        case TokenType.equalEqual:
             data = isEqual(left, right);
             break;
         default:
@@ -68,10 +68,10 @@ class Interpreter : Visitor {
     void visitUnaryExpr(Unary expr) {
         Variant right = evaluate(expr.right);
         switch (expr.operator.type) {
-        case TokenType.BANG:
+        case TokenType.bang:
             data = !isTruthy(right);
             break;
-        case TokenType.MINUS:
+        case TokenType.minus:
             checkNumberOperand(expr.operator, right);
             data = -right.get!double;
             break;
@@ -148,7 +148,7 @@ unittest {
 }
 
 unittest {
-    auto t = Token(TokenType.MINUS, "", LiteralType(Nothing()), 1);
+    auto t = Token(TokenType.minus, "", LiteralType(Nothing()), 1);
     checkNumberOperand(t, Variant(42.0));
 }
 

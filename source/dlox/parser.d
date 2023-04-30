@@ -23,7 +23,7 @@ class Parser {
 
     private Expr equality() {
         Expr expr = comparison;
-        while (match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL)) {
+        while (match(TokenType.bangEqual, TokenType.equalEqual)) {
             Token operator = previous;
             Expr right = comparison;
             expr = new Binary(expr, operator, right);
@@ -34,8 +34,8 @@ class Parser {
 
     private Expr comparison() {
         Expr expr = term;
-        while (match(TokenType.GREATER, TokenType.GREATER_EQUAL,
-                TokenType.LESS, TokenType.LESS_EQUAL)) {
+        while (match(TokenType.greater, TokenType.greaterEqual,
+                TokenType.less, TokenType.lessEqual)) {
             Token operator = previous;
             Expr right = term;
             expr = new Binary(expr, operator, right);
@@ -45,7 +45,7 @@ class Parser {
 
     private Expr term() {
         auto expr = factor;
-        while (match(TokenType.MINUS, TokenType.PLUS)) {
+        while (match(TokenType.minus, TokenType.plus)) {
             Token operator = previous;
             Expr right = factor;
             expr = new Binary(expr, operator, right);
@@ -55,7 +55,7 @@ class Parser {
 
     private Expr factor() {
         Expr expr = unary;
-        while (match(TokenType.SLASH, TokenType.STAR)) {
+        while (match(TokenType.slash, TokenType.star)) {
             Token operator = previous;
             Expr right = unary;
             expr = new Binary(expr, operator, right);
@@ -64,7 +64,7 @@ class Parser {
     }
 
     private Expr unary() {
-        if (match(TokenType.BANG, TokenType.MINUS)) {
+        if (match(TokenType.bang, TokenType.minus)) {
             Token operator = previous;
             Expr right = unary;
             return new Unary(operator, right);
@@ -73,17 +73,17 @@ class Parser {
     }
 
     private Expr primary() {
-        if (match(TokenType.FALSE)) {
+        if (match(TokenType.falseKeyword)) {
             return new Literal(LiteralType(false));
-        } else if (match(TokenType.TRUE)) {
+        } else if (match(TokenType.trueKeyword)) {
             return new Literal(LiteralType(true));
-        } else if (match(TokenType.NIL)) {
+        } else if (match(TokenType.nilKeyword)) {
             return new Literal(LiteralType(Nothing()));
-        } else if (match(TokenType.NUMBER, TokenType.STRING)) {
+        } else if (match(TokenType.numberLiteral, TokenType.stringLiteral)) {
             return new Literal(previous.literal);
-        } else if (match(TokenType.LEFT_PAREN)) {
+        } else if (match(TokenType.leftParen)) {
             Expr expr = expression;
-            consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
+            consume(TokenType.rightParen, "Expect ')' after expression.");
             return new Grouping(expr);
         }
 
@@ -124,7 +124,7 @@ class Parser {
     }
 
     private bool isAtEnd() {
-        return peek.type == TokenType.EOF;
+        return peek.type == TokenType.eof;
     }
 
     private Token peek() {
@@ -143,13 +143,13 @@ class Parser {
     private void synchronize() {
         advance;
         while (!isAtEnd) {
-            if (previous.type == TokenType.SEMICOLON) {
+            if (previous.type == TokenType.semicolon) {
                 return;
             }
             switch (peek.type) with (TokenType) {
-            case CLASS,
-                FUN, VAR, IF,
-                WHILE, PRINT, RETURN:
+            case classKeyword,
+                funKeyword, varKeyword, ifKeyword,
+                whileKeyword, printKeyword, returnKeyword:
                 return;
             default:
                 break;

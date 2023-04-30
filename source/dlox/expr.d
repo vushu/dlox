@@ -84,7 +84,7 @@ interface Visitor {
 
 unittest {
     Literal literal = new Literal(LiteralType(3.14));
-    Token t = Token(TokenType.MINUS, "-", LiteralType(Nothing()), 1);
+    Token t = Token(TokenType.minus, "-", LiteralType(Nothing()), 1);
     Unary unary = new Unary(t, literal);
     assert(unary.operator.lexeme == "-");
     assert((cast(Literal) unary.right).value == LiteralType(3.14));

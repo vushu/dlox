@@ -6,71 +6,71 @@ import std.typecons : Nullable, nullable;
 
 enum TokenType {
     // Single-character tokens.
-    LEFT_PAREN,
-    RIGHT_PAREN,
-    LEFT_BRACE,
-    RIGHT_BRACE,
-    COMMA,
-    DOT,
-    MINUS,
-    PLUS,
-    SEMICOLON,
-    SLASH,
-    STAR,
+    leftParen,
+    rightParen,
+    leftBrace,
+    rightBrace,
+    comma,
+    dot,
+    minus,
+    plus,
+    semicolon,
+    slash,
+    star,
 
     // One or two character tokens.
-    BANG,
-    BANG_EQUAL,
-    EQUAL,
-    EQUAL_EQUAL,
-    GREATER,
-    GREATER_EQUAL,
-    LESS,
-    LESS_EQUAL,
+    bang,
+    bangEqual,
+    equal,
+    equalEqual,
+    greater,
+    greaterEqual,
+    less,
+    lessEqual,
 
     // Literals.
-    IDENTIFIER,
-    STRING,
-    NUMBER,
+    identifier,
+    stringLiteral,
+    numberLiteral,
 
     // Keywords.
-    AND,
-    CLASS,
-    ELSE,
-    FALSE,
-    FUN,
-    FOR,
-    IF,
-    NIL,
-    OR,
-    PRINT,
-    RETURN,
-    SUPER,
-    THIS,
-    TRUE,
-    VAR,
-    WHILE,
+    andKeyword,
+    classKeyword,
+    elseKeyword,
+    falseKeyword,
+    funKeyword,
+    forKeyword,
+    ifKeyword,
+    nilKeyword,
+    orKeyword,
+    printKeyword,
+    returnKeyword,
+    superKeyword,
+    thisKeyword,
+    trueKeyword,
+    varKeyword,
+    whileKeyword,
 
-    EOF
+    eof
 }
 
 enum TokenType[string] KEYWORDS = [
-    "and": TokenType.AND,
-    "class": TokenType.CLASS,
-    "else": TokenType.ELSE,
-    "false": TokenType.FALSE,
-    "for": TokenType.FOR,
-    "fun": TokenType.FUN,
-    "if": TokenType.IF,
-    "nil": TokenType.NIL,
-    "or": TokenType.OR,
-    "print": TokenType.PRINT,
-    "return": TokenType.RETURN,
-    "super": TokenType.SUPER,
-    "this": TokenType.THIS,
-    "true": TokenType.TRUE,
-    "var": TokenType.VAR,
-    "while": TokenType.WHILE,
+    "and": TokenType.andKeyword,
+    "class": TokenType.classKeyword,
+    "else": TokenType.elseKeyword,
+    "false": TokenType.elseKeyword,
+    "for": TokenType.forKeyword,
+    "fun": TokenType.funKeyword,
+    "if": TokenType.ifKeyword,
+    "nil": TokenType.nilKeyword,
+    "or": TokenType.orKeyword,
+    "print": TokenType.printKeyword,
+    "return": TokenType.returnKeyword,
+    "super": TokenType.superKeyword,
+    "this": TokenType.thisKeyword,
+    "true": TokenType.trueKeyword,
+    "var": TokenType.varKeyword,
+    "while": TokenType.whileKeyword,
 ];
 
 struct Nothing {
@@ -109,16 +109,16 @@ LiteralType createDoubleLiteral(string value) {
 }
 
 unittest {
-    TokenType type = TokenType.STRING;
+    TokenType type = TokenType.stringLiteral;
     auto token = Token(type, "", createStringLiteral("helloWorld"), 1);
-    assert(token.toString == "{ type: STRING, lexeme: , literal: helloWorld, line: 1 }");
+    assert(token.toString == "{ type: stringLiteral, lexeme: , literal: helloWorld, line: 1 }");
 }
 
 unittest {
     import std.stdio;
 
-    TokenType type = TokenType.IDENTIFIER;
+    TokenType type = TokenType.identifier;
     auto token = Token(type, "", LiteralType(Nothing()), 1);
-    assert(token.toString == "{ type: IDENTIFIER, lexeme: , literal: null, line: 1 }");
+    assert(token.toString == "{ type: identifier, lexeme: , literal: null, line: 1 }");
 
 }
