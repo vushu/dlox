@@ -256,7 +256,7 @@ unittest {
     import std.stdio : writeln;
 
     auto scanner = Scanner("jumanji");
-    writeln("Should be of type IDENTIFIER");
+    writeln("Should be of type identifier");
     Token[] tokens = scanner.scanTokens;
     assert(tokens[0].type == TokenType.identifier);
     assert(tokens[1].type == TokenType.eof);

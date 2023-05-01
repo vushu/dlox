@@ -2,6 +2,8 @@ module dlox.interpreter;
 import std.array : Appender;
 import dlox.token;
 import dlox.expr;
+import dlox.lox;
+import dlox.runtime_error;
 import std.conv : to;
 import std.variant : Variant, variantArray;
 import std.sumtype : match;
@@ -10,22 +12,26 @@ import std.stdio;
 
 class Interpreter : Visitor {
 
+    void interpret(Expr expression) {
+        try {
+            Variant value = evaluate(expression);
+            writeln(stringify(value));
+        } catch (RuntimeError e) {
+            Lox.runTimeError(e);
+        }
+    }
+
     void visitLiteralExpr(Literal expr) {
-        auto res = expr.value.match!(
-            (ref Nothing _) => data = null,
-            (ref int v) => data = v,
-            (ref double v) => data = v,
-            (ref bool v) => data = v,
-            (ref string v) => data = v,
-        );
-        writeln(res);
+        auto res = expr.value.match!((ref Nothing _) => data = null,
+                (ref int v) => data = v, (ref double v) => data = v,
+                (ref bool v) => data = v, (ref string v) => data = v,);
+        //writeln(res);
     }
 
     void visitBinaryExpr(Binary expr) {
         auto left = evaluate(expr.left);
         auto right = evaluate(expr.right);
         switch (expr.operator.type) {
-
         case TokenType.minus:
             data = left.get!double - right.get!double;
             break;
@@ -123,13 +129,22 @@ private void checkNumberOperands(Token operator, Variant left, Variant right) {
     throw new RuntimeError(operator, "Operands must be a numbers");
 }
 
-private class RuntimeError : Exception {
-    Token token;
+private string stringify(Variant object) {
+    import std.algorithm.searching : endsWith;
 
-    this(Token token, string msg, string file = __FILE__, size_t line = __LINE__, Throwable nextInChain = null) pure nothrow @nogc @safe {
-        super(msg, file, line, nextInChain);
-        this.token = token;
+    if (object.type is typeid(null))
+        return "nil";
+    if (object.type is typeid(double)) {
+        string text = object.to!string;
+        if (text.endsWith(".0")) {
+            // omitting .0
+            text = text[0 .. $ - 2];
+        }
+        return text;
     }
+
+    return object.to!string;
+
 }
 
 unittest {
@@ -163,8 +178,9 @@ unittest {
     auto expr = parser.parse;
     auto interpreter = new Interpreter;
     if (expr) {
-        auto result = interpreter.evaluate(expr);
-        writeln(result);
-        assert(result == -40);
+        interpreter.interpret(expr);
+        //auto result = interpreter.interpret(expr);
+        //writeln(result);
+        //assert(result == -40);
     }
 }
