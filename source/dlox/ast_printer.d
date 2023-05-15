@@ -3,9 +3,9 @@ import dlox.expr;
 import dlox.token;
 import std.stdio;
 import std.conv : to;
-import std.array : Appender;
+import std.array : Appender, appender;
 
-class ASTPrinter : Visitor {
+class ASTPrinter : ExprVisitor, StmtVisitor {
 
     void visitLiteralExpr(Literal expr) {
         if (expr.value.isLiteralTypeNothing)
@@ -26,6 +26,15 @@ class ASTPrinter : Visitor {
         parenthesize(expr.operator.lexeme, expr.right);
     }
 
+    void visitPrintStmt(Print stmt){
+        parenthesize("print",stmt.expression);
+    }
+
+    void visitExpressionStmt(Expression stmt){
+
+    }
+
+
     private void parenthesize(string name, Expr[] exprs...) {
         appender.put("(");
         appender.put(name);
@@ -39,6 +48,21 @@ class ASTPrinter : Visitor {
     }
 
     Appender!string appender;
+
+}
+
+struct Wrapper(A, X, T){
+
+    A ma;
+    X mx;
+    T mt;
+    this(A mm, X msm){}
+}
+
+void doBar(T, S)(T element){
+}
+
+void testst(int x){
 
 }
 

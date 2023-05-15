@@ -14,14 +14,14 @@ import dlox.parser;
 import dlox.expr;
 import dlox.ast_printer;
 
+__gshared Interpreter interpreter = new Interpreter();
+
 Nullable!string readSourceFile(string path) {
     if (!exists(path)) {
         return Nullable!string.init;
     }
     return (cast(string) read(path)).nullable;
 }
-
-__gshared Interpreter interpreter = new Interpreter();
 
 void runPrompt() {
     info("Repl-mode");
@@ -40,18 +40,14 @@ void runRepl(string source) {
     auto scanner = Scanner(source);
     auto tokens = scanner.scanTokens;
     auto parser = new Parser(tokens);
-    //auto astPrinter = new ASTPrinter();
-    Expr expression = parser.parse;
-    //expression.accept(astPrinter);
-    //writeln(astPrinter.appender.data);
+    auto statements = parser.parse;
     if (Lox.hadError) {
-        writeln("hadError");
         return;
     }
 
-    writeln("-----------------");
-    interpreter.interpret(expression);
-    writeln("-----------------");
+    //writeln("-----------------");
+    interpreter.interpret(statements);
+    //writeln("-----------------");
     showArrow;
 }
 

@@ -10,12 +10,13 @@ import std.sumtype : match;
 import std.array;
 import std.stdio;
 
-class Interpreter : Visitor {
+class Interpreter : ExprVisitor, StmtVisitor {
 
-    void interpret(Expr expression) {
+    void interpret(Stmt[] statements) {
         try {
-            Variant value = evaluate(expression);
-            writeln(stringify(value));
+            foreach (statement; statements) {
+                execute(statement);
+            }
         } catch (RuntimeError e) {
             Lox.runTimeError(e);
         }
@@ -23,8 +24,8 @@ class Interpreter : Visitor {
 
     void visitLiteralExpr(Literal expr) {
         auto res = expr.value.match!((ref Nothing _) => data = null,
-                (ref int v) => data = v, (ref double v) => data = v,
-                (ref bool v) => data = v, (ref string v) => data = v,);
+            (ref int v) => data = v, (ref double v) => data = v,
+            (ref bool v) => data = v, (ref string v) => data = v,);
         //writeln(res);
     }
 
@@ -43,9 +44,9 @@ class Interpreter : Visitor {
             break;
         case TokenType.plus:
             if (left.type is typeid(double) && right.type is typeid(double)) {
-                data = left.get!double + left.get!double;
+                data = left.get!double + right.get!double;
             }
-            if (left.type is typeid(string) && right.type is typeid(string)) {
+            else if (left.type is typeid(string) && right.type is typeid(string)) {
                 data = (left.get!string ~ right.get!string);
             }
             break;
@@ -86,10 +87,23 @@ class Interpreter : Visitor {
         }
     }
 
+    void visitExpressionStmt(Expression stmt) {
+        evaluate(stmt.expression);
+    }
+
+    void visitPrintStmt(Print stmt) {
+        Variant value = evaluate(stmt.expression);
+        writeln(stringify(value));
+    }
+
     private Variant evaluate(Expr expr) {
         auto evaluator = new Interpreter();
         expr.accept(evaluator);
         return evaluator.data;
+    }
+
+    private void execute(Stmt stmt) {
+        stmt.accept(this);
     }
 
     Variant data;
@@ -171,16 +185,28 @@ unittest {
     import dlox.scanner;
     import dlox.parser;
 
-    auto source_code = "(2 + 2) * -10";
+    auto source_code = "(2 + 2) * -10;";
     auto scanner = new Scanner(source_code);
     auto tokens = scanner.scanTokens;
     auto parser = new Parser(tokens);
-    auto expr = parser.parse;
+    auto statements = parser.parse;
     auto interpreter = new Interpreter;
-    if (expr) {
-        interpreter.interpret(expr);
-        //auto result = interpreter.interpret(expr);
-        //writeln(result);
-        //assert(result == -40);
+    if (!statements.empty) {
+        interpreter.interpret(statements);
+    }
+}
+
+unittest {
+    import dlox.scanner;
+    import dlox.parser;
+
+    auto source_code = "print 220 * 20;";
+    auto scanner = new Scanner(source_code);
+    auto tokens = scanner.scanTokens;
+    auto parser = new Parser(tokens);
+    auto statements = parser.parse;
+    auto interpreter = new Interpreter;
+    if (!statements.empty) {
+        interpreter.interpret(statements);
     }
 }
