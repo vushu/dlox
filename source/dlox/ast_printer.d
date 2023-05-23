@@ -26,6 +26,10 @@ class ASTPrinter : ExprVisitor, StmtVisitor {
         parenthesize(expr.operator.lexeme, expr.right);
     }
 
+    void visitVariableExpr(Variable expr) {
+        // parenthesize(expr.operator.lexeme, expr.right);
+    }
+
     void visitPrintStmt(Print stmt){
         parenthesize("print",stmt.expression);
     }
@@ -33,6 +37,11 @@ class ASTPrinter : ExprVisitor, StmtVisitor {
     void visitExpressionStmt(Expression stmt){
 
     }
+
+    void visitVarStmt(Var stmt){
+
+    }
+
 
 
     private void parenthesize(string name, Expr[] exprs...) {

@@ -21,6 +21,29 @@ class Parser {
 
     }
 
+    private Stmt declaration() {
+        try {
+            if (match(TokenType.varKeyword)) {
+                return varDeclaration;
+            }
+            return statement;
+
+        } catch (Exception e) {
+            synchronize;
+            return null;
+        }
+    }
+
+    private Stmt varDeclaration() {
+        Token name = consume(TokenType.identifier, "Expected variable name.");
+        Expr initializer = null;
+        if (match(TokenType.equal)) {
+            initializer = expression;
+        }
+        consume(TokenType.semicolon, "Expected ';' after variable declaration.");
+        return new Var(name, initializer);
+    }
+
     private Stmt statement() {
         if (match(TokenType.printKeyword)) {
             return printStatement;
@@ -99,6 +122,8 @@ class Parser {
             return new Literal(LiteralType(Nothing()));
         } else if (match(TokenType.numberLiteral, TokenType.stringLiteral)) {
             return new Literal(previous.literal);
+        } else if (match(TokenType.identifier)) {
+            return new Variable(previous);
         } else if (match(TokenType.leftParen)) {
             Expr expr = expression;
             consume(TokenType.rightParen, "Expect ')' after expression.");
@@ -194,11 +219,12 @@ unittest {
     auto scanner = Scanner(sourceCode);
     Token[] tokens = scanner.scanTokens;
     Parser parser = new Parser(tokens);
-    // Expr expression = parser.parse;
-    // assert(!Lox.hadError);
-    // auto printer = new ASTPrinter;
-    // expression.accept(printer);
-    // auto printed = printer.appender.data;
+    Stmt[] statement = parser.parse;
+    assert(!Lox.hadError);
+    auto printer = new ASTPrinter;
+    statement[0].accept(printer);
+    auto printed = printer.appender.data;
+    writeln("/ ", printed);
     // assert(printed == q{(== (+ 40 2) (+ (* 4 10) 2))});
 
 }

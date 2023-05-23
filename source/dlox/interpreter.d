@@ -26,7 +26,6 @@ class Interpreter : ExprVisitor, StmtVisitor {
         auto res = expr.value.match!((ref Nothing _) => data = null,
             (ref int v) => data = v, (ref double v) => data = v,
             (ref bool v) => data = v, (ref string v) => data = v,);
-        //writeln(res);
     }
 
     void visitBinaryExpr(Binary expr) {
@@ -86,6 +85,8 @@ class Interpreter : ExprVisitor, StmtVisitor {
             break;
         }
     }
+    void visitVariableExpr(Variable expr) {
+    }
 
     void visitExpressionStmt(Expression stmt) {
         evaluate(stmt.expression);
@@ -94,6 +95,9 @@ class Interpreter : ExprVisitor, StmtVisitor {
     void visitPrintStmt(Print stmt) {
         Variant value = evaluate(stmt.expression);
         writeln(stringify(value));
+    }
+
+    void visitVarStmt(Var stmt) {
     }
 
     private Variant evaluate(Expr expr) {

@@ -85,20 +85,34 @@ class Unary : Expr {
     ]);
 }
 
+class Variable : Expr {
+    mixin MakeExpr!("Variable", [
+        ["Token", "token"]
+    ]);
+}
 class Expression : Stmt {
     mixin MakeStmt!("Expression", [
         ["Expr", "expression"]
     ]);
 }
+
 class Print : Stmt {
     mixin MakeStmt!("Print", [
         ["Expr", "expression"]
     ]);
 }
 
+class Var : Stmt {
+    mixin MakeStmt!("Var", [
+        ["Token", "token"],
+        ["Expr", "initializer"]
+    ]);
+}
+
 interface StmtVisitor {
     mixin(makeVisit!("Stmt", "Expression"));
     mixin(makeVisit!("Stmt", "Print"));
+    mixin(makeVisit!("Stmt", "Var"));
 }
 
 interface ExprVisitor {
@@ -106,6 +120,7 @@ interface ExprVisitor {
     mixin(makeVisit!("Expr", "Binary"));
     mixin(makeVisit!("Expr", "Grouping"));
     mixin(makeVisit!("Expr", "Unary"));
+    mixin(makeVisit!("Expr", "Variable"));
 }
 
 unittest {
@@ -116,4 +131,3 @@ unittest {
     assert((cast(Literal) unary.right).value == LiteralType(3.14));
     writeln(Literal.stringof);
 }
-
