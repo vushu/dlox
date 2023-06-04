@@ -13,7 +13,7 @@ template hasMagma(S) {
 }
 
 struct Vulcano {
-    int lava(){
+    int magma(){
         writeln("Vulcano makes lava");
         return 1;
     }
@@ -21,8 +21,9 @@ struct Vulcano {
 
 
 struct LavaMan{
-    void magma(){
+    int magma(){
         writeln("lavaman throwing lava");
+        return 1;
     }
 }
 

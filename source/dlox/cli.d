@@ -11,7 +11,7 @@ import dlox.scanner;
 import dlox.interpreter;
 import dlox.lox;
 import dlox.parser;
-import dlox.expr;
+import dlox.generate_ast;
 import dlox.ast_printer;
 
 __gshared Interpreter interpreter = new Interpreter();

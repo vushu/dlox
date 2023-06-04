@@ -1,5 +1,5 @@
 module dlox.ast_printer;
-import dlox.expr;
+import dlox.generate_ast;
 import dlox.token;
 import std.stdio;
 import std.conv : to;

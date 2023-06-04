@@ -5,7 +5,9 @@ struct Monkey {
 }
 
 struct Donkey {
+    void doStuff() {
 
+    }
 }
 
 class AstPrinter {
@@ -30,7 +32,8 @@ template hasVisitMonkey(S) {
 
 
 void visit(T)(T t) if(is(T == Donkey)){
-
+    Donkey d = Donkey.init;
+    d.doStuff;
 }
 
 void visit(T)(T t) if(is(T == Monkey)){

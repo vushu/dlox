@@ -1,6 +1,6 @@
 module dlox.parser;
 import dlox.token;
-import dlox.expr;
+import dlox.generate_ast;
 import dlox.lox;
 import std.stdio;
 

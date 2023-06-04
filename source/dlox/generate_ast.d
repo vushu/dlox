@@ -1,4 +1,4 @@
-module dlox.expr;
+module dlox.generate_ast;
 import std.array;
 import std.stdio;
 import dlox.token;

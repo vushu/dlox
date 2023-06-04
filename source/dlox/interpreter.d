@@ -1,7 +1,7 @@
 module dlox.interpreter;
 import std.array : Appender;
 import dlox.token;
-import dlox.expr;
+import dlox.generate_ast;
 import dlox.lox;
 import dlox.runtime_error;
 import std.conv : to;
